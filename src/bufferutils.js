@@ -5,18 +5,19 @@ const typeforce = require('typeforce');
 const varuint = require('varuint-bitcoin');
 // https://github.com/feross/buffer/blob/master/index.js#L1127
 function verifuint(value, max) {
-  if (typeof value !== 'number')
+  if (typeof value !== 'number' && typeof value !== 'bigint')
     throw new Error('cannot write a non-number as a number');
   if (value < 0)
     throw new Error('specified a negative value for writing an unsigned value');
-  if (value > max) throw new Error('RangeError: value out of range');
-  if (Math.floor(value) !== value)
+  if (typeof value === 'number' && value > max) throw new Error('RangeError: value out of range');
+  if (typeof value === 'number' && Math.floor(value) !== value)
     throw new Error('value has a fractional component');
 }
 function readUInt64LE(buffer, offset) {
   const a = BigInt(buffer.readUInt32LE(offset));
   let b = BigInt(buffer.readUInt32LE(offset + 4));
   b *= 0x100000000n;
+  verifuint(b + a, 0x001fffffffffffff);
   return b + a;
 }
 exports.readUInt64LE = readUInt64LE;
