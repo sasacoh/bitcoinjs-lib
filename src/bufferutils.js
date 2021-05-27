@@ -21,10 +21,9 @@ function readUInt64LE(buffer, offset) {
 }
 exports.readUInt64LE = readUInt64LE;
 function writeUInt64LE(buffer, value, offset) {
-  // bigint section
   if (typeof value === 'bigint') {
-    buffer.writeInt32LE(Number(value & -1n), offset);
-    buffer.writeUInt32LE(Number(value / 0x100000000n), offset + 4);
+    buffer.writeInt32LE(Number(value) & -1, offset);
+    buffer.writeUInt32LE(Number(value) / 0x100000000, offset + 4);
   } else {
     verifuint(value, 0x001fffffffffffff);
     buffer.writeInt32LE(value & -1, offset);
