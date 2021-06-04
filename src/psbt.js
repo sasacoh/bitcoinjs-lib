@@ -1228,7 +1228,7 @@ function addNonWitnessTxCache(cache, input, inputIndex) {
   });
 }
 function inputFinalizeGetAmts(inputs, tx, cache, mustFinalize) {
-  let inputAmount = 0;
+  let inputAmount = 0n;
   inputs.forEach((input, idx) => {
     if (mustFinalize && input.finalScriptSig)
       tx.ins[idx].script = input.finalScriptSig;
@@ -1238,23 +1238,23 @@ function inputFinalizeGetAmts(inputs, tx, cache, mustFinalize) {
       );
     }
     if (input.witnessUtxo) {
-      inputAmount += input.witnessUtxo.value;
+      inputAmount += BigInt(input.witnessUtxo.value);
     } else if (input.nonWitnessUtxo) {
       const nwTx = nonWitnessUtxoTxFromCache(cache, input, idx);
       const vout = tx.ins[idx].index;
       const out = nwTx.outs[vout];
-      inputAmount += out.value;
+      inputAmount += BigInt(out.value);
     }
   });
-  const outputAmount = tx.outs.reduce((total, o) => total + o.value, 0);
-  const fee = inputAmount - outputAmount;
-  if (fee < 0) {
+  const outputAmount = tx.outs.reduce((total, o) => total + o.value, 0n);
+  const fee = inputAmount - BigInt(outputAmount);
+  if (fee < 0n) {
     throw new Error('Outputs are spending more than Inputs');
   }
-  const bytes = tx.virtualSize();
+  const bytes = BigInt(tx.virtualSize());
   cache.__FEE = fee;
   cache.__EXTRACTED_TX = tx;
-  cache.__FEE_RATE = Math.floor(fee / bytes);
+  cache.__FEE_RATE = Number(fee / bytes); //Math.floor(fee / bytes);
 }
 function nonWitnessUtxoTxFromCache(cache, input, inputIndex) {
   const c = cache.__NON_WITNESS_UTXO_TX_CACHE;
